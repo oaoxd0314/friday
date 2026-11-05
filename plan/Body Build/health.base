@@ -1,0 +1,87 @@
+filters:
+  and:
+    - file.inFolder("daily")
+    - 'file.basename == "health"'
+    - 'file.ext == "md"'
+
+formulas:
+  day_link: 'file.asLink(date.format("YYYY-MM-DD"))'
+  to_goal: 'if(weight_7d, (weight_7d - 70).round(2), "")'  # 70 改成 goal_checkpoint_kg
+  diet: 'if(kcal, kcal.toString() + " / " + protein.toString() + " g" + if(diet_complete, "", " 缺餐"), "")'
+  train: 'if(run == "done", "🏃 ", "") + if(strength == "done", "💪", if(strength == "partial", "💪½", ""))'
+
+properties:
+  formula.day_link:
+    displayName: 日期
+  date:
+    displayName: 日期
+  day:
+    displayName: Day
+  weight:
+    displayName: 體重
+  weight_7d:
+    displayName: 7日均
+  rate_wk:
+    displayName: 週變化
+  formula.to_goal:
+    displayName: 距目標
+  formula.diet:
+    displayName: kcal / 蛋白
+  formula.train:
+    displayName: 訓練
+  meals_logged:
+    displayName: 記錄餐數
+  kcal:
+    displayName: kcal
+  protein:
+    displayName: 蛋白 g
+  sleep_h:
+    displayName: 睡眠
+
+views:
+  - type: table
+    name: 體重趨勢
+    limit: 30
+    sort:
+      - property: date
+        direction: DESC
+    order:
+      - formula.day_link
+      - day
+      - weight
+      - weight_7d
+      - rate_wk
+      - formula.to_goal
+    summaries:
+      weight: Average
+      weight_7d: Min
+
+  - type: table
+    name: 每日總覽
+    limit: 30
+    sort:
+      - property: date
+        direction: DESC
+    order:
+      - formula.day_link
+      - weight
+      - formula.diet
+      - formula.train
+      - sleep_h
+
+  - type: table
+    name: 飲食完整日
+    filters:
+      and:
+        - 'diet_complete == true'
+    sort:
+      - property: date
+        direction: DESC
+    order:
+      - formula.day_link
+      - kcal
+      - protein
+      - meals_logged
+    summaries:
+      kcal: Average
+      protein: Average
